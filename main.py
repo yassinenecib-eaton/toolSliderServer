@@ -1,17 +1,25 @@
 #!/usr/bin/env python3
 import sys
+import os
 from PyQt5.QtWidgets import QApplication, QMainWindow, QSlider
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QLabel
 from tkinter import *
-
-import socket
+import time
 import threading
+import logging
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
-updateValue=0
-def threaded_server(arg):
+
+def show_values():
+    return w1.get()
+
+def thread_function(name, ):
+    logging.info("Thread %s: starting", name)
+    logging.info("Thread %s: finishing", name)
+    import socket
+
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind((HOST, PORT))
         s.listen()
@@ -19,42 +27,27 @@ def threaded_server(arg):
         with conn:
             print(f"Connected by {addr}")
             while True:
-                #data = conn.recv(1024)
-                print("Data should be sent to the client: ", str(arg))
-                #if not data:
-               #    break
-                #print("Data sent to the client: ", ex.changeValue)
-                conn.sendall(arg.encode())
+                time.sleep(1)
+                print("In the thread: ", show_values())
+                data = conn.recv(1024)
+                dataTosend = str(show_values())
+                myIntStr= dataTosend.encode('utf-8')
+                conn.sendall(myIntStr) 
+
+master = Tk()
+w1 = Scale(master, from_=0, to=42, orient= HORIZONTAL)
+master.geometry("250x250")
+w1.set(19)
+w1.pack()
+
+x = threading.Thread(target=thread_function, args=(1,))
+x.setDaemon(True)
+logging.info("Main    : before running thread")
+x.start()
+logging.info("Main    : wait for the thread to finish")
+logging.info("Main    : all done")
 
 
-class Example(QMainWindow):
-    def __init__(self):
-        super().__init__()
-
-        mySlider = QSlider(Qt.Horizontal, self)
-        mySlider.setGeometry(30, 40, 200, 30)
-        updateValue = mySlider.valueChanged[int].connect(self.changeValue)
-
-        self.setGeometry(50,50,320,200)
-        self.setWindowTitle("Slider Example :)")
-        self.label1 = QLabel("tool :)", self);
-        self.label1.setAlignment(Qt.AlignCenter);
-        self.show()
-
-    def changeValue(self, value):
-        print(value)
-
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-
-    ex = Example()
-
-    #while True:
-     #   print(ex.getValue())
-    #thread = threading.Thread(target=threaded_server, args=(updateValue,))
-    #thread.start()
-    sys.exit(app.exec_())
-    #print("thread finished...exiting")
-    #thread.join()
+mainloop()
+x.join()
 
