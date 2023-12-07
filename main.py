@@ -27,12 +27,14 @@ def thread_function(name, ):
         with conn:
             print(f"Connected by {addr}")
             while True:
-                time.sleep(1)
-                print("In the thread: ", show_values())
+                #print("In the thread: ", show_values())
                 data = conn.recv(1024)
-                dataTosend = str(show_values())
-                myIntStr= dataTosend.encode('utf-8')
-                conn.sendall(myIntStr) 
+                try:
+                    dataTosend = str(show_values())
+                    myIntStr= dataTosend.encode('utf-8')
+                    conn.sendall(myIntStr)
+                except:
+                    SystemExit
 
 master = Tk()
 w1 = Scale(master, from_=0, to=42, orient= HORIZONTAL)
