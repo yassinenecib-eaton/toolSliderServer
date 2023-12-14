@@ -1,0 +1,11 @@
+***Objectif: 
+1) Send data of the slider to the tcp/ip server.
+2) The server send then to the client
+
+***How to run ?
+1) Use Visual Studio Code
+2) Start the server server.py from VSC
+3) Start t.he client named: python3.8 ./client.py
+see the result when you move the slider in the client terminal.
+There is an image named result.png
+Have fun :)
