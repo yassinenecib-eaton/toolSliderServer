@@ -13,7 +13,6 @@ import time
 
 FILE_PATH = "../msa/config-msa.json"
 bo1_is_on = 1
-bo2_is_on = 1
 
 def switch_bo1():
     global bo1_is_on
@@ -21,17 +20,14 @@ def switch_bo1():
     # Determine is on or off
     if bo1_is_on:
         bo1_is_on = 0
+        print("bo1_is_on", bo1_is_on)
+        on_button1.configure(image = photoimage_on)
+        
     else:
         bo1_is_on = 1
-        
-def switch_bo2():
-    global bo2_is_on
-     
-    # Determine is on or off
-    if bo2_is_on:
-        bo2_is_on = 0
-    else:
-        bo2_is_on = 1
+        print("bo1_is_on", bo1_is_on)
+        on_button1.configure(image = photoimage_off)
+ 
         
 def update_json_element(data, address, value):
     for element in data['assets']:
@@ -65,7 +61,6 @@ def thread_function(name, ):
             result = update_json_element(data, 30, w1.get())
             result |= update_json_element(data, 32, w2.get())
             result |= update_json_element(data, 200, bo1_is_on)
-            result |= update_json_element(data, 201, bo2_is_on)
             if (result):
                 jsonfile = open(FILE_PATH, "w")
                 jsonfile.write(json.dumps(data, indent = 2))
@@ -90,11 +85,17 @@ w2 = Scale(master, from_=10, to=100, orient= HORIZONTAL, resolution= 0.01, label
 w2.set(25)
 w2.pack()
 
-on_button1 = Button(master, command= switch_bo1)
-on_button1.place(x=10, y=200)
+# Creating a photoimage object to use image 
+photo_Off = PhotoImage(file = r"off.png") 
+photo_On = PhotoImage(file = r"on.png") 
 
-on_button2 = Button(master, command= switch_bo2)
-on_button2.place(x=40, y=200)
+# Resizing image to fit on button 
+photoimage_off = photo_Off.subsample(2,2)
+photoimage_on = photo_On.subsample(2,2) 
+
+on_button1 = Button(master, command= switch_bo1,image = photoimage_off)
+
+on_button1.place(x=10, y=200)
  
 thread1 = threading.Thread(target=thread_function, args=(1,))
 thread1.setDaemon(True)
