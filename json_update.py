@@ -7,12 +7,16 @@ from tkinter import *
 import time
 import threading
 import logging
+import openpyxl
+import pandas as pd
+import random
 
 import json
 import time
 
 FILE_PATH = "../msa/config-msa.json"
-bo1_is_on = 1
+bo1_is_on = 0
+auto_mode_is_on = 0
 
 def switch_bo1():
     global bo1_is_on
@@ -21,12 +25,26 @@ def switch_bo1():
     if bo1_is_on:
         bo1_is_on = 0
         print("bo1_is_on", bo1_is_on)
-        on_button1.configure(image = photoimage_on)
+        on_button1.configure(image = photoimage_off)
         
     else:
         bo1_is_on = 1
         print("bo1_is_on", bo1_is_on)
-        on_button1.configure(image = photoimage_off)
+        on_button1.configure(image = photoimage_on)
+        
+def switch_auto_mode():
+    global auto_mode_is_on
+     
+    # Determine is on or off
+    if auto_mode_is_on:
+        auto_mode_is_on = 0
+        print("auto_mode_is_on", auto_mode_is_on)
+        auto_mode_button.configure(image = photoimage_off)
+        
+    else:
+        auto_mode_is_on = 1
+        print("auto_mode_is_on", auto_mode_is_on)
+        auto_mode_button.configure(image = photoimage_on)
  
         
 def update_json_element(data, address, value):
@@ -58,8 +76,15 @@ def thread_function(name, ):
     while True: 
         try: 
             result = 0
-            result = update_json_element(data, 30, w1.get())
-            result |= update_json_element(data, 32, w2.get())
+            if(auto_mode_is_on == 0):
+                value1 = w1.get()
+                value2 = w2.get()
+            else:
+                value1 = w1data[random.randrange(len(w1data))]
+                value2 = w2data[random.randrange(len(w2data))]
+                
+            result = update_json_element(data, 30, value1)
+            result |= update_json_element(data, 32, value2)
             result |= update_json_element(data, 200, bo1_is_on)
             if (result):
                 jsonfile = open(FILE_PATH, "w")
@@ -70,6 +95,19 @@ def thread_function(name, ):
         except:
             jsonfile.close()
             SystemExit
+
+dataframe = openpyxl.load_workbook('warrendaledata-mod.xlsx')
+data = dataframe.active
+
+for row in data.iter_cols(min_row=6, values_only=True):
+    if row[0] == "BusV":
+        w1data = row
+        print(len(w1data))
+        # for cell in row:
+        #     print(cell)
+    if row[0] == "Bus Freqency":
+        w2data = row
+        print(len(w2data))
             
 jsonfile = open(FILE_PATH, "r+")
 data = json.load(jsonfile)
@@ -94,8 +132,10 @@ photoimage_off = photo_Off.subsample(2,2)
 photoimage_on = photo_On.subsample(2,2) 
 
 on_button1 = Button(master, command= switch_bo1,image = photoimage_off)
-
 on_button1.place(x=10, y=200)
+
+auto_mode_button = Button(master, command= switch_auto_mode,image = photoimage_off)
+auto_mode_button.place(x=200, y=10)
  
 thread1 = threading.Thread(target=thread_function, args=(1,))
 thread1.setDaemon(True)
