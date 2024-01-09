@@ -51,29 +51,43 @@ def update_json_element(data, address, value):
     for element in data['assets']:
         if element['id'] == 2:
             for sub_element in element['points']:
+                print(sub_element['name'])
                 if sub_element['addr'] == address:
+                    # print("found", address)
                     if sub_element['value'] == value:
                         return 0
                     else:
                         sub_element['value'] = value
                         return 1
+                else:
+                    print("element not found")
+                    return 0
                     
 def update_json_element_by_name(data, name, value):
     for element in data['assets']:
         if element['id'] == 2:
             for sub_element in element['points']:
                 if sub_element['name'] == name:
+                    print("found element")
                     if sub_element['value'] == value:
                         return 0
                     else:
                         sub_element['value'] = value
                         return 1
+                    
+def get_json_element(data, address):
+    for element in data['assets']:
+        if element['id'] == 2:
+            for sub_element in element['points']:
+                if sub_element['name'] == name:
+                    return sub_element
 
 def thread_function(name, ):
     logging.info("Thread %s: starting", name)
     logging.info("Thread %s: finishing", name)
     
     while True: 
+        print("new search")
         try: 
             result = 0
             if(auto_mode_is_on == 0):
@@ -102,26 +116,24 @@ data = dataframe.active
 for row in data.iter_cols(min_row=6, values_only=True):
     if row[0] == "BusV":
         w1data = row
-        print(len(w1data))
-        # for cell in row:
-        #     print(cell)
     if row[0] == "Bus Freqency":
         w2data = row
-        print(len(w2data))
             
 jsonfile = open(FILE_PATH, "r+")
 data = json.load(jsonfile)
 jsonfile.close()
 
 master = Tk()
-master.geometry("250x250")
-w1 = Scale(master, from_=10, to=100, orient= HORIZONTAL, resolution= 0.01, label= "maxPchrg")
-w1.set(19)
-w1.pack()
+# master.geometry("500x500")
+w1 = Scale(master, from_=475, to=490, orient= HORIZONTAL, resolution= 0.01, label= "maxPchrg")
+w1.grid(row=2, column=3)
+w1.set(478)
+# w1.pack()
 
-w2 = Scale(master, from_=10, to=100, orient= HORIZONTAL, resolution= 0.01, label= "maxPdsch")
-w2.set(25)
-w2.pack()
+w2 = Scale(master, from_=59, to=61, orient= HORIZONTAL, resolution= 0.01, label= "Freq_BU1ES1")
+w2.grid(row=2, column=4)
+w2.set(60)
+# w2.pack()
 
 # Creating a photoimage object to use image 
 photo_Off = PhotoImage(file = r"off.png") 
@@ -131,12 +143,17 @@ photo_On = PhotoImage(file = r"on.png")
 photoimage_off = photo_Off.subsample(2,2)
 photoimage_on = photo_On.subsample(2,2) 
 
+on_button1_label = Label(master, text = "ReadySt").grid(row=0, column=3, padx=2, pady=2)
+
 on_button1 = Button(master, command= switch_bo1,image = photoimage_off)
-on_button1.place(x=10, y=200)
+on_button1.grid(row=1, column=3)
+
+auto_mode = Label(master, text = "auto mode").grid(row=0, column=0, padx=2, pady=2)
+# auto_mode.pack(padx = 5, pady=15, side=LEFT)
 
 auto_mode_button = Button(master, command= switch_auto_mode,image = photoimage_off)
-auto_mode_button.place(x=200, y=10)
- 
+auto_mode_button.grid(row=1, column=0, padx=2, pady=2)
+
 thread1 = threading.Thread(target=thread_function, args=(1,))
 thread1.setDaemon(True)
 logging.info("Main    : before running thread")
