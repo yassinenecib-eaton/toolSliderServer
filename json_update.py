@@ -47,21 +47,12 @@ def switch_auto_mode():
         auto_mode_button.configure(image = photoimage_on)
  
         
-def update_json_element(data, address, value):
-    for element in data['assets']:
-        if element['id'] == 2:
-            for sub_element in element['points']:
-                print(sub_element['name'])
-                if sub_element['addr'] == address:
-                    # print("found", address)
-                    if sub_element['value'] == value:
-                        return 0
-                    else:
-                        sub_element['value'] = value
-                        return 1
-                else:
-                    print("element not found")
-                    return 0
+def update_json_element(element, value):
+    if element['value'] == value:
+        return 0
+    else:
+        element['value'] = value
+        return 1
                     
 def update_json_element_by_name(data, name, value):
     for element in data['assets']:
@@ -79,15 +70,15 @@ def get_json_element(data, address):
     for element in data['assets']:
         if element['id'] == 2:
             for sub_element in element['points']:
-                if sub_element['name'] == name:
+                if sub_element['addr'] == address:
                     return sub_element
+            return 0
 
 def thread_function(name, ):
     logging.info("Thread %s: starting", name)
     logging.info("Thread %s: finishing", name)
     
     while True: 
-        print("new search")
         try: 
             result = 0
             if(auto_mode_is_on == 0):
@@ -97,9 +88,9 @@ def thread_function(name, ):
                 value1 = w1data[random.randrange(len(w1data))]
                 value2 = w2data[random.randrange(len(w2data))]
                 
-            result = update_json_element(data, 30, value1)
-            result |= update_json_element(data, 32, value2)
-            result |= update_json_element(data, 200, bo1_is_on)
+            result = update_json_element(element1, value1)
+            result |= update_json_element(element2, value2)
+            result |= update_json_element(element3, bo1_is_on)
             if (result):
                 jsonfile = open(FILE_PATH, "w")
                 jsonfile.write(json.dumps(data, indent = 2))
@@ -111,9 +102,9 @@ def thread_function(name, ):
             SystemExit
 
 dataframe = openpyxl.load_workbook('warrendaledata-mod.xlsx')
-data = dataframe.active
-
-for row in data.iter_cols(min_row=6, values_only=True):
+dataExcel = dataframe.active
+    
+for row in dataExcel.iter_cols(min_row=6, values_only=True):
     if row[0] == "BusV":
         w1data = row
     if row[0] == "Bus Freqency":
@@ -122,6 +113,16 @@ for row in data.iter_cols(min_row=6, values_only=True):
 jsonfile = open(FILE_PATH, "r+")
 data = json.load(jsonfile)
 jsonfile.close()
+
+element1 = get_json_element(data, 30)
+element2 = get_json_element(data, 32)
+element3 = get_json_element(data, 200)
+
+if element1 == 0:
+    print("error element 1")
+    
+if element2 == 0:
+    print("error element 2")
 
 master = Tk()
 # master.geometry("500x500")
