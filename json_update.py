@@ -17,6 +17,7 @@ import time
 FILE_PATH = "../msa/config-msa.json"
 bo1_is_on = 0
 auto_mode_is_on = 0
+button={}
 
 def switch_bo1():
     global bo1_is_on
@@ -83,10 +84,10 @@ def thread_function(name, ):
             result = 0
             if(auto_mode_is_on == 0):
                 value1 = w1.get()
-                value2 = w2.get()
+                value2 = int(w2.get()*100)
             else:
                 value1 = w1data[random.randrange(len(w1data))]
-                value2 = w2data[random.randrange(len(w2data))]
+                value2 = int(w2data[random.randrange(len(w2data))]*100)
                 
             result = update_json_element(element1, value1)
             result |= update_json_element(element2, value2)
@@ -115,7 +116,7 @@ data = json.load(jsonfile)
 jsonfile.close()
 
 element1 = get_json_element(data, 30)
-element2 = get_json_element(data, 32)
+element2 = get_json_element(data, 116)
 element3 = get_json_element(data, 200)
 
 if element1 == 0:
